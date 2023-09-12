@@ -15,6 +15,7 @@ app.set('view engine','ejs')
 app.set('views','./views')
 
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.static(__dirname+"/public")) 
 
 //라우팅
 app.get('/',(req,res) => {
@@ -49,6 +50,7 @@ app.post('/contactProc', (req,res) => {
   })
   res.send(a);
 })
+
 
 app.listen(port, () => {
   console.log('HTML 서버 시작됨:' + port)
