@@ -42,15 +42,33 @@ app.post('/contactProc', (req,res) => {
 
   var sql = `insert into contact(name,phone,email,memo,regdate)
   values('${name}','${phone}','${email}','${memo}',now() )`
-  var a = `안녕하세요 ${name},${phone}`
   connection.query(sql, function (err, result){
     if(err) throw err; 
     console.log('자료 1개를 삽입하였습니다.');
     res.send("<script> alert('문의사항이 등록되었습니다.'); location.href='/';</script>"); 
   })
-  res.send(a);
 })
 
+app.get('/contactDelete', (req,res) => {
+  var idx = req.query.idx
+  var sql = `delete from contact where idx='${idx}' `
+  connection.query(sql, function (err, result){
+    if(err) throw err; 
+
+    res.send("<script> alert('삭제되었습니다.'); location.href='/contactList';</script>"); 
+  })
+})
+
+
+app.get('/contactList', (req,res) => {
+
+  var sql = `select * from contact order by idx desc `
+   connection.query(sql, function (err, results, fields){
+      if(err) throw err; 
+      console.log(results)
+      res.render('contactList',{lists:results})
+   })
+})
 
 app.listen(port, () => {
   console.log('HTML 서버 시작됨:' + port)
