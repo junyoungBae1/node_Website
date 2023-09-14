@@ -1,8 +1,10 @@
 let express = require('express')
 const ejs = require('ejs')
-var bodyParser = require('body-parser')
+
 let app = express()
 let port = 3000
+var bodyParser = require('body-parser')
+var session= require('express-session')
 
 require('dotenv').config()
 
@@ -17,8 +19,29 @@ app.set('views','./views')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(express.static(__dirname+"/public")) 
 
+app.use(session({
+  secret: 'junyoung',
+  cookie: { maxAge: 60000 },
+  resave:true,
+  saveUninitialized:true
+}))
+
+app.use((req, res, next)=>{
+
+  res.locals.user_id =""
+  res.locals.name =""
+  if(req.session.member){
+    res.locals.user_id = req.session.member.user_id
+    res.locals.name = req.session.member.name
+  }
+  next()
+})
+
 //라우팅
 app.get('/',(req,res) => {
+
+  console.log(req.session.member);
+
   res.render('index') // ./views/index.ejs
 })
 
@@ -76,6 +99,11 @@ app.get('/login', (req,res) => {
   res.render('login')
 })
 
+app.get('/logout', (req,res) => {
+  req.session.member = null;
+  res.send("<script> alert('로그아웃되었습니다.'); location.href='/';</script>"); 
+})
+
 app.post('/loginProc', (req,res) => {
   const user_id = req.body.user_id;
   const pw = req.body.pw;
@@ -91,8 +119,9 @@ app.post('/loginProc', (req,res) => {
       
       res.send("<script> alert('존재하지않는 아이디입니다..'); location.href='/login';</script>"); 
     }else{
-
-      res.send(result) 
+      console.log(result[0])
+      req.session.member = result[0]
+      res.send("<script> alert('로그인 되었습니다.'); location.href='/';</script>"); 
     } 
   })
 })
