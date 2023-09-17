@@ -104,6 +104,29 @@ app.get('/logout', (req,res) => {
   res.send("<script> alert('로그아웃되었습니다.'); location.href='/';</script>"); 
 })
 
+app.get('/signup', (req,res) => {
+  res.render('signup')
+})
+app.post('/signupProc', (req,res) => {
+  const user_id = req.body.user_id;
+  const pw = req.body.pw;
+  const name = req.body.name;
+
+  // 데이터베이스에 회원 정보를 삽입하는 SQL 쿼리
+  const sql = `INSERT INTO member (user_id, pw, name) VALUES (?, ?, ?)`;
+  const values = [user_id, pw, name];
+
+  connection.query(sql, values, (err, result) => {
+      if (err) {
+          // 회원가입 실패 시 오류 처리
+          console.log(result)
+          res.send("<script> alert('회원가입에 실패하였습니다. 다시 시도해주세요.'); location.href='/signup';</script>");
+      } else {
+          // 회원가입 성공 시 로그인 페이지로 리디렉션
+          res.send("<script> alert('회원가입이 완료되었습니다. 로그인해주세요.'); location.href='/login';</script>");
+      }
+  })
+})
 app.post('/loginProc', (req,res) => {
   const user_id = req.body.user_id;
   const pw = req.body.pw;
