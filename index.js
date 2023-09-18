@@ -112,19 +112,31 @@ app.post('/signupProc', (req,res) => {
   const pw = req.body.pw;
   const name = req.body.name;
 
-  // 데이터베이스에 회원 정보를 삽입하는 SQL 쿼리
-  const sql = `INSERT INTO member (user_id, pw, name) VALUES (?, ?, ?)`;
-  const values = [user_id, pw, name];
+  //중복 아이디 확인
+  connection.query('SELECT * FROM member WHERE user_id = ?', [user_id], (err, results) => {
+    if (err) throw err;
 
-  connection.query(sql, values, (err, result) => {
-      if (err) {
-          // 회원가입 실패 시 오류 처리
-          console.log(result)
-          res.send("<script> alert('회원가입에 실패하였습니다. 다시 시도해주세요.'); location.href='/signup';</script>");
-      } else {
-          // 회원가입 성공 시 로그인 페이지로 리디렉션
-          res.send("<script> alert('회원가입이 완료되었습니다. 로그인해주세요.'); location.href='/login';</script>");
-      }
+    if(results.length > 0){
+      //아이디가 있다면
+      res.send("<script> alert('이미 사용중인 아이디입니다.'); location.href='/signup';</script>");
+    }
+  // 데이터베이스에 회원 정보를 삽입하는 SQL 쿼리
+    else{
+      const sql = `INSERT INTO member (user_id, pw, name) VALUES (?, ?, ?)`;
+      const values = [user_id, pw, name];
+
+      connection.query(sql, values, (err, result) => {
+          if (err) {
+              // 회원가입 실패 시 오류 처리
+              console.log(result)
+              res.send("<script> alert('회원가입에 실패하였습니다. 다시 시도해주세요.'); location.href='/signup';</script>");
+          } else {
+              // 회원가입 성공 시 로그인 페이지로 리디렉션
+              res.send("<script> alert('회원가입이 완료되었습니다. 로그인해주세요.'); location.href='/login';</script>");
+          }
+          
+      })
+    }
   })
 })
 app.post('/loginProc', (req,res) => {
